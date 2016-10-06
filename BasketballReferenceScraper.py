@@ -22,12 +22,23 @@ def get_alphabet_urls():
     alphabet_urls = [BASE_URL + "/players/" + letter + "/" for letter in alphabet if letter not in x]
     return alphabet_urls
 
-def get_player_links(alphabet_url):
+def get_player_urls(alphabet_url):
+    """Returns dictionary mapping player name to player's url"""
     soup = make_soup(alphabet_url)
     players = soup.find(id="players")
-    #active_player_links = [BASE_URL + active["href"] for active in players.findAll("a")]
-    active_player_links = [BASE_URL + active.a["href"] for active in players.findAll("strong")]
-    return active_player_links
+    active_player_names = [active.a for active in players.findAll("strong")]
+    active_player_urls = {active.a.string : BASE_URL + active.a["href"] for active in players.findAll("strong")}
+    return active_player_urls
+
+def get_player_stats(player_url):
+    # get urls to each year the player was active
+    soup = make_soup(player_url)
+    years_table = soup.find(id="per_game")
+    years_urls = [BASE_URL + years.th.a["href"] for years in years_table.findAll("tr", {"class" : "full_table"})]
+    return years_urls
+    # loop over each year for the player's stats through each game that year
+    
+
 
 #def get_category_winner(category_url):
 #    soup = make_soup(category_url)
@@ -43,13 +54,15 @@ def get_player_links(alphabet_url):
 
 if __name__ == '__main__':
     
-    alphabet_urls = get_alphabet_urls()
-    active_player_urls = []
-    for letter_url in alphabet_urls:
-        active_player_urls_letter = get_player_links(letter_url) 
-        active_player_urls += active_player_urls_letter
-
-    print active_player_urls
+    years_urls = get_player_stats("http://www.basketball-reference.com/players/a/acyqu01.html")
+    print years_urls
+#    alphabet_urls = get_alphabet_urls()
+#    active_player_urls = []
+#    for letter_url in alphabet_urls:
+#        active_player_urls_letter = get_player_urls(letter_url) 
+#        print active_player_urls_letter
+#        active_player_urls += active_player_urls_letter
+#        sleep(1)
 
     #lastname_A = "http://www.basketball-reference.com/players/a/"
     #players_A = get_player_links(lastname_A)

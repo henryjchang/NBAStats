@@ -4,32 +4,6 @@ from time import sleep
 import string
 import unicodecsv as csv
 
-#class GameStats:
-#    name        =0
-#    date        =0
-#    age         =0
-#    team        =0
-#    at          =0
-#    opponent    =0
-#    minutes     =0
-#    fg          =0
-#    fga         =0
-#    fg_pct      =0
-#    fg3         =0
-#    fg3a        =0
-#    fg3_pct     =0
-#    ft          =0
-#    fta         =0
-#    ft_pct      =0
-#    orb         =0
-#    drb         =0
-#    trb         =0
-#    ast         =0
-#    stl         =0
-#    blk         =0
-#    to          =0
-#    pts         =0
-#    plusminus   =0
 
 
 #players sorted in alphabetical order by last name
@@ -70,7 +44,6 @@ def get_player_year_stats(player_name, player_year_url):
     """ get player's stats through each game that year 
     name date age team at opponent minutes fg fga fg_pct fg3 fg3a fg3_pct ft fta ft_pct orb drb trb ast stl blk tov pts plus_minus 
     """
-    # for now, choose a single row
     soup = make_soup(player_year_url)
     game_table = soup.find("table", {"class" : "row_summable sortable stats_table"}).find("tbody")
     games = game_table.findAll("tr", id)
@@ -112,51 +85,25 @@ def get_player_year_stats(player_name, player_year_url):
     return data_all
 
 
-#def get_category_winner(category_url):
-#    soup = make_soup(category_url)
-#    #category = soup.find("h1", "headline headline-4088191").string
-#    category = soup.find("h1", "headline").string
-#    print category
-#    winner = [h2.string for h2 in soup.findAll("h2", "boc1")]
-#    runners_up = [h2.string for h2 in soup.findAll("h2", "boc2")]
-#    return {"category": category, 
-#            "category_url": category_url, 
-#            "winner": winner, 
-#            "runners_up": runners_up}
-
 if __name__ == '__main__':
 
-    data = get_player_year_stats("Quincy Acy", "http://www.basketball-reference.com/players/a/acyqu01/gamelog/2013/")
-    #print data
-    
-    fout = open('test.csv', 'w')
-    for row in data:
-        for column in row:
-            fout.write('%s,' % column)
-        fout.write('\n')
+    alphabet_urls = get_alphabet_urls()
+    active_player_urls = {}
+    for letter_url in alphabet_urls:
+        active_player_urls_letter = get_player_urls(letter_url) 
+        active_player_urls.update(active_player_urls_letter)
+        sleep(1)
+
+    fout = open('stats.csv', 'a')
+    for name, url in sorted(active_player_urls.iteritems()):
+        years_urls = get_player_years_urls(url)
+        for year_url in years_urls:
+            data = get_player_year_stats(name, year_url)
+            for row in data:
+                for column in row:
+                    fout.write('%s,' % column)
+                fout.write('\n')
+        #raw_input("Press Enter to continue...")
     fout.close()
 
-#    years_urls = get_player_years_urls("http://www.basketball-reference.com/players/a/acyqu01.html")
-#    print years_urls
-
-#    alphabet_urls = get_alphabet_urls()
-#    active_player_urls = []
-#    for letter_url in alphabet_urls:
-#        active_player_urls_letter = get_player_urls(letter_url) 
-#        print active_player_urls_letter
-#        active_player_urls += active_player_urls_letter
-#        sleep(1)
-
-    #lastname_A = "http://www.basketball-reference.com/players/a/"
-    #players_A = get_player_links(lastname_A)
-
-    #print players_A
-
-#    data = []
-#    for category in categories:
-#        winner = get_category_winner(category)
-#        data.append(winner)
-#        #sleep(1)
-#
-#    print data
 
